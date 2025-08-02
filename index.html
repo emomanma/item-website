@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>产品分析器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #loginSection, #cameraSection {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        #cameraSection {
+            display: flex;
+        }
+        video, canvas {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #productList {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 500px;
+        }
+        #productList table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #productList th, #productList td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #productList th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginSection">
+        <h2>登录</h2>
+        <input type="text" id="username" placeholder="用户名" />
+        <input type="password" id="password" placeholder="密码" />
+        <button onclick="login()">登录</button>
+    </div>
+
+    <div id="cameraSection">
+        <h2>产品拍照</h2>
+        <video id="video" autoplay playsinline></video>
+        <button id="snap" onclick="snap()">拍照</button>
+        <canvas id="canvas" style="display:none;"></canvas>
+        <input type="text" id="productName" placeholder="产品名称" />
+        <button onclick="saveImage()">保存图片</button>
+        <button onclick="analyzeAll()">分析所有产品</button>
+        <div id="productList">
+            <h3>产品列表</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>产品名称</th>
+                        <th>品牌</th>
+                        <th>价格</th>
+                        <th>条形码</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let productList = [];
+
+        // 检查用户是否已登录
+        if (localStorage.getItem('loggedIn') === 'true') {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('cameraSection').style.display = 'flex';
+            startCamera();
+        } else {
+            document.getElementById('loginSection').style.display = 'flex';
+            document.getElementById('cameraSection').style.display = 'none';
+        }
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            // 简单的登录验证
+            if (username === 'admin' && password === 'password') {
+                localStorage.setItem('loggedIn', 'true');
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('cameraSection').style.display = 'flex';
+                startCamera();
+            } else {
+                alert('用户名或密码错误');
+            }
+        }
+
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                })
+                .catch(function(err) {
+                    console.log("摄像头访问被拒绝: " + err);
+                });
+        }
+
+        function snap() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            canvas.style.display = 'block';
+        }
+
+        function saveImage() {
+            const productName = document.getElementById('productName').value;
+            if (!productName) {
+                alert('请输入产品名称');
+                return;
+            }
+            const dataURL = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = productName + '.png';
+            link.href = dataURL;
+            link.click();
+            productList.push({ name: productName, brand: '', price: '', barcode: '' });
+            updateProductList();
+            canvas.style.display = 'none';
+            document.getElementById('productName').value = '';
+        }
+
+        function updateProductList() {
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = '';
+            productList.forEach(product => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = product.name;
+                row.insertCell(1).textContent = product.brand;
+                row.insertCell(2).textContent = product.price;
+                row.insertCell(3).textContent = product.barcode;
+            });
+        }
+
+        function analyzeAll() {
+            // 注意：GitHub Pages是静态托管服务，不支持Node.js后端
+            // 要在GitHub Pages上使用此功能，您需要将以下URL更改为您的后端API地址
+            // 例如：https://your-backend-api.com/analyze
+            fetch('/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ products: productList })
+            })
+            .then(response => response.json())
+            .then(data => {
+                productList = data.products;
+                updateProductList();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
