@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "name": "smart-product-system",
+  "builds": [
+    {
+      "src": "batch-server-concurrent.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/batch-server-concurrent.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "batch-server-concurrent.js": {
+      "maxDuration": 30
+    }
+  }
+}

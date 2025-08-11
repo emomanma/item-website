@@ -1,0 +1,17 @@
+$schema: https://railway.app/railway.schema.json
+version: "2"
+
+services:
+  web:
+    source:
+      repo: emomanma/item-website
+    build:
+      command: npm install
+    start:
+      command: node batch-server-concurrent.js
+    environment:
+      NODE_ENV: production
+      PORT: ${{ PORT }}
+    volumes:
+      - name: uploads
+        mountPath: /app/uploads
