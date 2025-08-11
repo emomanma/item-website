@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 智能产品收集系统 v6.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-nav {
+            flex: 1;
+            padding: 10px;
+            font-size: 0.9rem;
+            min-width: 110px;
+        }
+
+        .btn-camera {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+            width: 100%;
+        }
+
+        .btn-camera.stop {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .camera-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .camera-container.active {
+            display: block;
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            background: #000;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .capture-controls {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .btn-capture {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 5px solid white;
+            font-size: 2rem;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        .product-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+        }
+
+        .product-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .product-group-title {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .product-group-info {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .photo-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-remove {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .group-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .status {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .status.active {
+            display: block;
+        }
+
+        .status.success {
+            background: linear-gradient(135deg, #d5f4e6, #c8e6c9);
+            color: #2e7d32;
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            color: #c62828;
+        }
+
+        .status.info {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #1565c0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        .current-group-indicator {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .analysis-result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .batch-actions {
+            background: #ecf0f1;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .batch-actions h4 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部信息 -->
+        <div class="header">
+            <h1>📱 智能产品收集系统 v6.0</h1>
+            <p>批量拍摄 · 智能分析 · 高效管理</p>
+        </div>
+
+        <!-- 导航按钮 -->
+        <div class="nav-buttons">
+            <button class="btn btn-nav btn-primary" onclick="showSection('capture')">📸 批量拍摄</button>
+            <button class="btn btn-nav btn-secondary" onclick="showSection('collection')">📦 收集库</button>
+            <button class="btn btn-nav btn-secondary" onclick="showSection('products')">📋 产品库</button>
+        </div>
+
+        <!-- 状态显示 -->
+        <div id="status" class="status">
+            <div id="statusText">就绪</div>
+        </div>
+
+        <!-- 批量拍摄区域 -->
+        <div id="captureSection" class="section active">
+            <!-- 当前产品组指示器 -->
+            <div class="current-group-indicator" id="currentGroupIndicator">
+                📦 当前产品组: 产品组 #1 (0 张照片)
+            </div>
+
+            <!-- 摄像头开关按钮 -->
+            <button id="cameraToggle" class="btn btn-camera">
+                <span id="cameraIcon">📸</span>
+                <span id="cameraText">启动摄像头</span>
+            </button>
+
+            <!-- 摄像头容器 -->
+            <div class="camera-container" id="cameraContainer">
+                <div class="video-wrapper">
+                    <video id="video" autoplay muted playsinline></video>
+                    <canvas id="canvas"></canvas>
+                </div>
+                <div class="capture-controls">
+                    <button id="captureBtn" class="btn-capture">📸</button>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button id="nextProductBtn" class="btn btn-success" style="flex: 1;">
+                            ➡️ 下一个产品
+                        </button>
+                        <button id="finishCaptureBtn" class="btn btn-warning" style="flex: 1;">
+                            ✅ 完成拍摄
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 当前组照片预览 -->
+            <div id="currentGroupPreview" class="hidden">
+                <h3>📸 当前产品组照片</h3>
+                <div class="photo-grid" id="currentGroupGrid"></div>
+            </div>
+        </div>
+
+        <!-- 收集库区域 -->
+        <div id="collectionSection" class="section">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalGroups">0</div>
+                    <div class="stat-label">产品组数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPhotos">0</div>
+                    <div class="stat-label">总照片数</div>
+                </div>
+            </div>
+
+            <div class="batch-actions">
+                <h4>🤖 批量操作</h4>
+                <div style="display: flex; gap: 10px;">
+                    <button id="analyzeAllBtn" class="btn btn-primary" style="flex: 1;">
+                        🚀 分析全部
+                    </button>
+                    <button id="clearAllBtn" class="btn btn-danger" style="flex: 1;">
+                        🗑️ 清空全部
+                    </button>
+                </div>
+            </div>
+
+            <h3>📦 产品组列表</h3>
+            <div id="productGroupsList">
+                <p>暂无产品组，请先进行拍摄</p>
+            </div>
+        </div>
+
+        <!-- 产品库区域 -->
+        <div id="productsSection" class="section">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="savedProducts">0</div>
+                    <div class="stat-label">已保存产品</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="savedImages">0</div>
+                    <div class="stat-label">产品图片</div>
+                </div>
+            </div>
+
+            <button id="exportBtn" class="btn btn-warning">📊 导出Excel</button>
+            <button id="refreshBtn" class="btn btn-secondary">🔄 刷新列表</button>
+
+            <h3>📋 已保存产品</h3>
+            <div id="productList">
+                <p>正在加载产品列表...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 产品信息编辑模态框 -->
+    <div id="editModal" class="modal">
+        <div style="background: white; border-radius: 20px; padding: 30px; max-width: 90%; max-height: 90%; overflow-y: auto;">
+            <h3 style="margin-bottom: 20px; color: #2c3e50;">✏️ 编辑产品信息</h3>
+            
+            <div id="editPhotos" class="photo-grid" style="margin-bottom: 20px;"></div>
+            
+            <div class="form-group">
+                <label for="editProductName">📦 产品名称</label>
+                <input type="text" id="editProductName" placeholder="请输入产品名称">
+            </div>
+            <div class="form-group">
+                <label for="editProductBrand">🏷️ 品牌</label>
+                <input type="text" id="editProductBrand" placeholder="请输入品牌名称">
+            </div>
+            <div class="form-group">
+                <label for="editProductPrice">💰 价格</label>
+                <input type="text" id="editProductPrice" placeholder="请输入价格">
+            </div>
+            <div class="form-group">
+                <label for="editProductBarcode">🔍 条形码</label>
+                <input type="text" id="editProductBarcode" placeholder="请输入条形码">
+            </div>
+            <div class="form-group">
+                <label for="editProductDescription">📄 描述</label>
+                <textarea id="editProductDescription" placeholder="请输入产品描述（可选）"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button id="saveProductBtn" class="btn btn-success" style="flex: 1;">💾 保存产品</button>
+                <button id="cancelEditBtn" class="btn btn-secondary" style="flex: 1;">❌ 取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片放大查看模态框 -->
+    <div id="imageModal" class="modal">
+        <span class="modal-close" id="modalClose">&times;</span>
+        <img id="modalImage" class="modal-content">
+    </div>
+
+    <script>
+        class BatchProductSystem {
+            constructor() {
+                this.stream = null;
+                this.productGroups = []; // 产品组数组
+                this.currentGroupIndex = 0;
+                this.currentGroupPhotos = []; // 当前产品组的照片
+                this.isProcessing = false;
+                this.savedProducts = [];
+                this.editingGroup = null;
+                
+                this.initElements();
+                this.initEventListeners();
+                this.loadProductGroups();
+                this.loadSavedProducts();
+                this.restoreCurrentGroupState(); // 恢复当前产品组状态
+                this.updateCurrentGroupIndicator();
+            }
+
+            initElements() {
+                this.cameraToggle = document.getElementById('cameraToggle');
+                this.cameraContainer = document.getElementById('cameraContainer');
+                this.video = document.getElementById('video');
+                this.canvas = document.getElementById('canvas');
+                this.captureBtn = document.getElementById('captureBtn');
+                this.nextProductBtn = document.getElementById('nextProductBtn');
+                this.finishCaptureBtn = document.getElementById('finishCaptureBtn');
+                this.status = document.getElementById('status');
+                this.statusText = document.getElementById('statusText');
+                this.currentGroupIndicator = document.getElementById('currentGroupIndicator');
+                this.currentGroupPreview = document.getElementById('currentGroupPreview');
+                this.currentGroupGrid = document.getElementById('currentGroupGrid');
+                this.productGroupsList = document.getElementById('productGroupsList');
+                this.analyzeAllBtn = document.getElementById('analyzeAllBtn');
+                this.clearAllBtn = document.getElementById('clearAllBtn');
+                this.productList = document.getElementById('productList');
+                this.exportBtn = document.getElementById('exportBtn');
+                this.refreshBtn = document.getElementById('refreshBtn');
+                this.editModal = document.getElementById('editModal');
+                this.saveProductBtn = document.getElementById('saveProductBtn');
+                this.cancelEditBtn = document.getElementById('cancelEditBtn');
+                this.imageModal = document.getElementById('imageModal');
+                this.modalImage = document.getElementById('modalImage');
+                this.modalClose = document.getElementById('modalClose');
+            }
+
+            initEventListeners() {
+                this.cameraToggle.addEventListener('click', () => this.toggleCamera());
+                this.captureBtn.addEventListener('click', () => this.capturePhoto());
+                this.nextProductBtn.addEventListener('click', () => this.nextProduct());
+                this.finishCaptureBtn.addEventListener('click', () => this.finishCapture());
+                this.analyzeAllBtn.addEventListener('click', () => this.analyzeAllGroups());
+                this.clearAllBtn.addEventListener('click', () => this.clearAllGroups());
+                this.exportBtn.addEventListener('click', () => this.exportToExcel());
+                this.refreshBtn.addEventListener('click', () => this.loadSavedProducts());
+                this.saveProductBtn.addEventListener('click', () => this.saveEditedProduct());
+                this.cancelEditBtn.addEventListener('click', () => this.closeEditModal());
+
+                // 模态框关闭
+                this.modalClose.addEventListener('click', () => this.closeImageModal());
+                this.imageModal.addEventListener('click', (e) => {
+                    if (e.target === this.imageModal) {
+                        this.closeImageModal();
+                    }
+                });
+                this.editModal.addEventListener('click', (e) => {
+                    if (e.target === this.editModal) {
+                        this.closeEditModal();
+                    }
+                });
+            }
+
+            async toggleCamera() {
+                if (this.stream) {
+                    this.stopCamera();
+                } else {
+                    await this.startCamera();
+                }
+            }
+
+            async startCamera() {
+                try {
+                    this.showStatus('🔄 正在启动摄像头...', 'info');
+
+                    this.stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            facingMode: 'environment',
+                            width: { ideal: 480, max: 640 },
+                            height: { ideal: 640, max: 854 },
+                            aspectRatio: { ideal: 0.75 }
+                        },
+                        audio: false
+                    });
+
+                    this.video.srcObject = this.stream;
+                    await this.video.play();
+
+                    // 更新UI
+                    this.cameraContainer.classList.add('active');
+                    this.cameraToggle.classList.add('stop');
+                    document.getElementById('cameraIcon').textContent = '🛑';
+                    document.getElementById('cameraText').textContent = '关闭摄像头';
+
+                    this.showStatus('✅ 摄像头启动成功！开始拍摄产品', 'success');
+
+                } catch (error) {
+                    console.error('摄像头启动失败:', error);
+                    this.showStatus('❌ 摄像头启动失败: ' + error.message, 'error');
+                }
+            }
+
+            stopCamera() {
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+
+                    // 更新UI
+                    this.cameraContainer.classList.remove('active');
+                    this.cameraToggle.classList.remove('stop');
+                    document.getElementById('cameraIcon').textContent = '📸';
+                    document.getElementById('cameraText').textContent = '启动摄像头';
+
+                    this.showStatus('📷 摄像头已关闭', 'info');
+                }
+            }
+
+            async capturePhoto() {
+                if (this.isProcessing) return;
+
+                try {
+                    this.isProcessing = true;
+                    this.showStatus('📸 正在拍照...', 'info');
+
+                    // 获取视频的实际尺寸
+                    const videoWidth = this.video.videoWidth;
+                    const videoHeight = this.video.videoHeight;
+
+                    // 设置canvas尺寸
+                    this.canvas.width = videoWidth;
+                    this.canvas.height = videoHeight;
+
+                    const ctx = this.canvas.getContext('2d');
+                    ctx.drawImage(this.video, 0, 0, videoWidth, videoHeight);
+
+                    // 转换为blob并上传
+                    const blob = await new Promise((resolve, reject) => {
+                        this.canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error('无法创建图像'));
+                            }
+                        }, 'image/jpeg', 0.9);
+                    });
+
+                    const formData = new FormData();
+                    formData.append('image', blob, `group_${this.currentGroupIndex + 1}_photo_${this.currentGroupPhotos.length + 1}.jpg`);
+
+                    const response = await fetch('/upload-image', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`上传失败: ${response.status} - ${errorText}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.currentGroupPhotos.push(result.imagePath);
+                        this.updateCurrentGroupPreview();
+                        this.updateCurrentGroupIndicator();
+                        this.saveCurrentGroupState(); // 保存当前状态
+                        this.showStatus(`✅ 拍照成功！当前产品组: ${this.currentGroupPhotos.length} 张`, 'success');
+                    } else {
+                        throw new Error(result.error || '上传失败');
+                    }
+
+                } catch (error) {
+                    console.error('拍照失败:', error);
+                    this.showStatus('❌ 拍照失败: ' + error.message, 'error');
+                } finally {
+                    this.isProcessing = false;
+                }
+            }
+
+            nextProduct() {
+                if (this.currentGroupPhotos.length === 0) {
+                    this.showStatus('⚠️ 当前产品组还没有照片', 'error');
+                    return;
+                }
+
+                // 保存当前产品组
+                this.saveCurrentGroup();
+                
+                // 创建新的产品组
+                this.currentGroupIndex++;
+                this.currentGroupPhotos = [];
+                
+                this.updateCurrentGroupIndicator();
+                this.updateCurrentGroupPreview();
+                this.saveCurrentGroupState(); // 保存当前状态
+                this.showStatus(`🎯 已切换到产品组 #${this.currentGroupIndex + 1}`, 'info');
+            }
+
+            finishCapture() {
+                if (this.currentGroupPhotos.length > 0) {
+                    this.saveCurrentGroup();
+                }
+                
+                this.stopCamera();
+                this.showStatus(`✅ 拍摄完成！共拍摄了 ${this.productGroups.length} 个产品组`, 'success');
+                
+                // 切换到收集库页面
+                setTimeout(() => {
+                    showSection('collection');
+                }, 1500);
+            }
+
+            saveCurrentGroup() {
+                if (this.currentGroupPhotos.length === 0) return;
+
+                const group = {
+                    id: Date.now() + this.currentGroupIndex,
+                    index: this.currentGroupIndex,
+                    photos: [...this.currentGroupPhotos],
+                    createdAt: new Date().toISOString(),
+                    analyzed: false,
+                    productInfo: null
+                };
+
+                // 检查是否已存在该索引的组
+                const existingIndex = this.productGroups.findIndex(g => g.index === this.currentGroupIndex);
+                if (existingIndex >= 0) {
+                    this.productGroups[existingIndex] = group;
+                } else {
+                    this.productGroups.push(group);
+                }
+
+                this.saveProductGroups();
+                this.updateCollectionStats();
+            }
+
+            updateCurrentGroupIndicator() {
+                this.currentGroupIndicator.textContent = 
+                    `📦 当前产品组: 产品组 #${this.currentGroupIndex + 1} (${this.currentGroupPhotos.length} 张照片)`;
+            }
+
+            updateCurrentGroupPreview() {
+                this.currentGroupGrid.innerHTML = '';
+                this.currentGroupPhotos.forEach((photoPath, index) => {
+                    const photoItem = document.createElement('div');
+                    photoItem.className = 'photo-item';
+                    photoItem.innerHTML = `
+                        <img src="${photoPath}" alt="照片 ${index + 1}" onclick="system.openImageModal('${photoPath}')">
+                        <button class="photo-remove" onclick="system.removeCurrentGroupPhoto(${index})">×</button>
+                    `;
+                    this.currentGroupGrid.appendChild(photoItem);
+                });
+
+                this.currentGroupPreview.classList.toggle('hidden', this.currentGroupPhotos.length === 0);
+            }
+
+            removeCurrentGroupPhoto(index) {
+                this.currentGroupPhotos.splice(index, 1);
+                this.updateCurrentGroupPreview();
+                this.updateCurrentGroupIndicator();
+                this.saveCurrentGroupState(); // 保存当前状态
+                this.showStatus(`🗑️ 已删除照片，剩余 ${this.currentGroupPhotos.length} 张`, 'info');
+            }
+
+            // 恢复当前产品组状态
+            restoreCurrentGroupState() {
+                const savedState = localStorage.getItem('currentGroupState');
+                
+                // 计算下一个可用的产品组索引
+                const maxExistingIndex = this.productGroups.length > 0 ? 
+                    Math.max(...this.productGroups.map(g => g.index)) : -1;
+                const nextAvailableIndex = maxExistingIndex + 1;
+                
+                if (savedState) {
+                    const state = JSON.parse(savedState);
+                    this.currentGroupPhotos = state.currentGroupPhotos || [];
+                    
+                    // 如果有保存的照片，使用保存的索引，否则使用下一个可用索引
+                    if (this.currentGroupPhotos.length > 0) {
+                        this.currentGroupIndex = state.currentGroupIndex || nextAvailableIndex;
+                    } else {
+                        this.currentGroupIndex = nextAvailableIndex;
+                    }
+                } else {
+                    this.currentGroupIndex = nextAvailableIndex;
+                    this.currentGroupPhotos = [];
+                }
+                
+                // 确保索引不与现有产品组重复
+                while (this.productGroups.some(g => g.index === this.currentGroupIndex)) {
+                    this.currentGroupIndex++;
+                }
+                
+                this.updateCurrentGroupPreview();
+                console.log(`当前产品组索引: ${this.currentGroupIndex}, 最大已存在索引: ${maxExistingIndex}`);
+            }
+
+            // 保存当前产品组状态
+            saveCurrentGroupState() {
+                const state = {
+                    currentGroupIndex: this.currentGroupIndex,
+                    currentGroupPhotos: this.currentGroupPhotos
+                };
+                localStorage.setItem('currentGroupState', JSON.stringify(state));
+            }
+
+            loadProductGroups() {
+                const saved = localStorage.getItem('productGroups');
+                if (saved) {
+                    this.productGroups = JSON.parse(saved);
+                }
+                this.displayProductGroups();
+                this.updateCollectionStats();
+            }
+
+            saveProductGroups() {
+                localStorage.setItem('productGroups', JSON.stringify(this.productGroups));
+                this.displayProductGroups();
+                this.updateCollectionStats();
+            }
+
+            displayProductGroups() {
+                if (this.productGroups.length === 0) {
+                    this.productGroupsList.innerHTML = '<p>暂无产品组，请先进行拍摄</p>';
+                    return;
+                }
+
+                this.productGroupsList.innerHTML = this.productGroups.map(group => `
+                    <div class="product-group">
+                        <div class="product-group-header">
+                            <div class="product-group-title">📦 产品组 #${group.index + 1}</div>
+                            <div class="product-group-info">
+                                ${group.photos.length} 张照片 | ${group.analyzed ? '✅ 已分析' : '⏳ 未分析'}
+                            </div>
+                        </div>
+                        
+                        <div class="photo-grid">
+                            ${group.photos.slice(0, 6).map(photo => `
+                                <div class="photo-item">
+                                    <img src="${photo}" alt="产品照片" onclick="system.openImageModal('${photo}')">
+                                </div>
+                            `).join('')}
+                            ${group.photos.length > 6 ? `<div style="display: flex; align-items: center; justify-content: center; background: #ecf0f1; border-radius: 8px; font-size: 0.8rem; color: #7f8c8d;">+${group.photos.length - 6}</div>` : ''}
+                        </div>
+
+                        ${group.analyzed && group.productInfo ? `
+                            <div class="analysis-result">
+                                <strong>🤖 AI分析结果:</strong><br>
+                                📦 名称: ${group.productInfo.name}<br>
+                                🏷️ 品牌: ${group.productInfo.brand}<br>
+                                💰 价格: ${group.productInfo.price}<br>
+                                🔍 条形码: ${group.productInfo.barcode}
+                            </div>
+                        ` : ''}
+
+                        <div class="group-actions">
+                            <button class="btn-small btn-primary" onclick="system.analyzeGroup(${group.id})">
+                                🤖 AI分析
+                            </button>
+                            <button class="btn-small btn-success" onclick="system.editGroup(${group.id})" ${!group.analyzed ? 'disabled' : ''}>
+                                ✏️ 编辑保存
+                            </button>
+                            <button class="btn-small btn-danger" onclick="system.deleteGroup(${group.id})">
+                                🗑️ 删除
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            updateCollectionStats() {
+                const totalPhotos = this.productGroups.reduce((sum, group) => sum + group.photos.length, 0);
+                document.getElementById('totalGroups').textContent = this.productGroups.length;
+                document.getElementById('totalPhotos').textContent = totalPhotos;
+            }
+
+            async analyzeGroup(groupId) {
+                const group = this.productGroups.find(g => g.id === groupId);
+                if (!group) return;
+
+                try {
+                    this.showStatus('🤖 正在分析产品组...', 'info');
+
+                    const response = await fetch('/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            imagePaths: group.photos,
+                            photoCount: group.photos.length
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`分析失败: ${response.status} - ${errorText}`);
+                    }
+
+                    const result = await response.json();
+
+                    if (result.success !== false) {
+                        group.analyzed = true;
+                        group.productInfo = result.data || result;
+                        this.saveProductGroups();
+                        this.showStatus('✅ AI分析完成！', 'success');
+                    } else {
+                        throw new Error(result.error || '分析失败');
+                    }
+
+                } catch (error) {
+                    console.error('AI分析失败:', error);
+                    this.showStatus('❌ AI分析失败: ' + error.message, 'error');
+                }
+            }
+
+            async analyzeAllGroups() {
+                const unanalyzedGroups = this.productGroups.filter(g => !g.analyzed);
+                if (unanalyzedGroups.length === 0) {
+                    this.showStatus('ℹ️ 所有产品组都已分析过了', 'info');
+                    return;
+                }
+
+                this.showStatus(`🚀 开始批量分析 ${unanalyzedGroups.length} 个产品组...`, 'info');
+
+                for (let i = 0; i < unanalyzedGroups.length; i++) {
+                    const group = unanalyzedGroups[i];
+                    this.showStatus(`🤖 正在分析产品组 #${group.index + 1} (${i + 1}/${unanalyzedGroups.length})`, 'info');
+                    
+                    try {
+                        await this.analyzeGroup(group.id);
+                        // 短暂延迟避免API限制
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    } catch (error) {
+                        console.error(`分析产品组 #${group.index + 1} 失败:`, error);
+                    }
+                }
+
+                this.showStatus('✅ 批量分析完成！', 'success');
+            }
+
+            editGroup(groupId) {
+                const group = this.productGroups.find(g => g.id === groupId);
+                if (!group || !group.analyzed) return;
+
+                this.editingGroup = group;
+                
+                // 显示图片
+                document.getElementById('editPhotos').innerHTML = group.photos.map(photo => `
+                    <div class="photo-item">
+                        <img src="${photo}" alt="产品照片" onclick="system.openImageModal('${photo}')">
+                    </div>
+                `).join('');
+
+                // 填充表单
+                document.getElementById('editProductName').value = group.productInfo.name || '';
+                document.getElementById('editProductBrand').value = group.productInfo.brand || '';
+                document.getElementById('editProductPrice').value = group.productInfo.price || '';
+                document.getElementById('editProductBarcode').value = group.productInfo.barcode || '';
+                document.getElementById('editProductDescription').value = '';
+
+                this.editModal.style.display = 'flex';
+            }
+
+            async saveEditedProduct() {
+                if (!this.editingGroup) return;
+
+                try {
+                    const productData = {
+                        name: document.getElementById('editProductName').value.trim(),
+                        brand: document.getElementById('editProductBrand').value.trim(),
+                        price: document.getElementById('editProductPrice').value.trim(),
+                        barcode: document.getElementById('editProductBarcode').value.trim(),
+                        description: document.getElementById('editProductDescription').value.trim(),
+                        imagePaths: this.editingGroup.photos
+                    };
+
+                    if (!productData.name) {
+                        this.showStatus('⚠️ 请输入产品名称', 'error');
+                        return;
+                    }
+
+                    this.showStatus('💾 正在保存产品...', 'info');
+
+                    const response = await fetch('/save-product', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(productData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // 从产品组中移除已保存的组
+                        this.productGroups = this.productGroups.filter(g => g.id !== this.editingGroup.id);
+                        this.saveProductGroups();
+                        
+                        this.closeEditModal();
+                        this.showStatus(`✅ 产品保存成功！序列号: ${result.serialNumber}`, 'success');
+                        
+                        // 刷新产品库
+                        this.loadSavedProducts();
+                    } else {
+                        throw new Error(result.error || '保存失败');
+                    }
+
+                } catch (error) {
+                    console.error('保存失败:', error);
+                    this.showStatus('❌ 保存失败: ' + error.message, 'error');
+                }
+            }
+
+            closeEditModal() {
+                this.editModal.style.display = 'none';
+                this.editingGroup = null;
+            }
+
+            deleteGroup(groupId) {
+                if (!confirm('确定要删除这个产品组吗？')) return;
+
+                this.productGroups = this.productGroups.filter(g => g.id !== groupId);
+                this.saveProductGroups();
+                this.showStatus('🗑️ 产品组已删除', 'info');
+            }
+
+            clearAllGroups() {
+                if (!confirm('确定要清空所有产品组吗？此操作不可恢复！')) return;
+
+                this.productGroups = [];
+                this.currentGroupIndex = 0;
+                this.currentGroupPhotos = [];
+                this.saveProductGroups();
+                this.saveCurrentGroupState(); // 保存当前状态
+                this.updateCurrentGroupIndicator();
+                this.updateCurrentGroupPreview();
+                this.showStatus('🗑️ 所有产品组已清空', 'info');
+            }
+
+            async loadSavedProducts() {
+                try {
+                    this.showStatus('🔄 正在加载产品列表...', 'info');
+
+                    const response = await fetch('/products');
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.savedProducts = result.products;
+                        this.displaySavedProducts();
+                        this.updateProductsStats();
+                        this.showStatus(`✅ 已加载 ${result.total} 个产品`, 'success');
+                    } else {
+                        throw new Error(result.error || '加载失败');
+                    }
+
+                } catch (error) {
+                    console.error('加载产品失败:', error);
+                    this.showStatus('❌ 加载产品失败: ' + error.message, 'error');
+                    this.productList.innerHTML = '<p>加载失败，请检查网络连接</p>';
+                }
+            }
+
+            displaySavedProducts() {
+                if (this.savedProducts.length === 0) {
+                    this.productList.innerHTML = '<p>暂无已保存的产品</p>';
+                    return;
+                }
+
+                this.productList.innerHTML = this.savedProducts.map(product => {
+                    // 安全地获取产品字段，避免undefined/null错误
+                    const name = product.name || '未知产品';
+                    const serialNumber = product.serialNumber || 'N/A';
+                    const brand = product.brand || '未知品牌';
+                    const price = product.price || '未知价格';
+                    const barcode = product.barcode || '未识别';
+                    const imagePaths = product.imagePaths || [];
+                    const createdAt = product.createdAt ? new Date(product.createdAt).toLocaleString() : '未知时间';
+
+                    return `
+                        <div class="product-group">
+                            <div class="product-group-header">
+                                <div class="product-group-title">${name}</div>
+                                <div class="product-group-info">${serialNumber}</div>
+                            </div>
+                            
+                            <div style="margin: 10px 0; font-size: 0.9rem;">
+                                <div><strong>🏷️ 品牌:</strong> ${brand}</div>
+                                <div><strong>💰 价格:</strong> ${price}</div>
+                                <div><strong>🔍 条形码:</strong> ${barcode}</div>
+                            </div>
+
+                            ${imagePaths.length > 0 ? `
+                                <div class="photo-grid">
+                                    ${imagePaths.slice(0, 6).map(path => `
+                                        <div class="photo-item">
+                                            <img src="${path}" alt="产品图片" onclick="system.openImageModal('${path}')">
+                                        </div>
+                                    `).join('')}
+                                    ${imagePaths.length > 6 ? `<div style="display: flex; align-items: center; justify-content: center; background: #ecf0f1; border-radius: 8px; font-size: 0.8rem; color: #7f8c8d;">+${imagePaths.length - 6}</div>` : ''}
+                                </div>
+                            ` : '<div style="color: #7f8c8d; font-style: italic;">暂无图片</div>'}
+
+                            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 0.8rem; color: #7f8c8d;">
+                                    创建时间: ${createdAt}
+                                </div>
+                                <button class="btn btn-secondary" onclick="system.deleteProduct('${product.id}')" style="padding: 5px 10px; font-size: 0.8rem;">
+                                    🗑️ 删除
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateProductsStats() {
+                const totalImages = this.savedProducts.reduce((sum, product) => {
+                    return sum + (product.imagePaths ? product.imagePaths.length : 0);
+                }, 0);
+
+                document.getElementById('savedProducts').textContent = this.savedProducts.length;
+                document.getElementById('savedImages').textContent = totalImages;
+            }
+
+            async deleteProduct(productId) {
+                if (!confirm('确定要删除这个产品吗？')) {
+                    return;
+                }
+
+                try {
+                    this.showStatus('🗑️ 正在删除产品...', 'info');
+
+                    const response = await fetch(`/products/${productId}`, {
+                        method: 'DELETE'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.showStatus('✅ 产品删除成功', 'success');
+                        await this.loadSavedProducts(); // 重新加载产品列表
+                    } else {
+                        throw new Error(result.error || '删除失败');
+                    }
+
+                } catch (error) {
+                    console.error('删除产品失败:', error);
+                    this.showStatus('❌ 删除产品失败: ' + error.message, 'error');
+                }
+            }
+
+            async exportToExcel() {
+                try {
+                    this.showStatus('📊 正在导出Excel文件...', 'info');
+
+                    const response = await fetch('/export-excel');
+                    
+                    if (!response.ok) {
+                        throw new Error('导出失败');
+                    }
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `产品数据_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    this.showStatus('✅ Excel文件已下载！', 'success');
+
+                } catch (error) {
+                    console.error('导出Excel失败:', error);
+                    this.showStatus('❌ 导出失败: ' + error.message, 'error');
+                }
+            }
+
+            openImageModal(imagePath) {
+                this.modalImage.src = imagePath;
+                this.imageModal.style.display = 'flex';
+            }
+
+            closeImageModal() {
+                this.imageModal.style.display = 'none';
+                this.modalImage.src = '';
+            }
+
+            showStatus(message, type = 'info') {
+                this.status.className = `status active ${type}`;
+                this.statusText.textContent = message;
+
+                if (type === 'success' || type === 'error') {
+                    setTimeout(() => {
+                        if (type === 'success') {
+                            this.status.classList.remove('active');
+                        }
+                    }, 3000);
+                }
+            }
+        }
+
+        // 页面切换功能
+        function showSection(sectionName) {
+            // 隐藏所有section
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // 显示指定section
+            document.getElementById(sectionName + 'Section').classList.add('active');
+
+            // 更新按钮状态
+            document.querySelectorAll('.btn-nav').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+
+            event.target.classList.remove('btn-secondary');
+            event.target.classList.add('btn-primary');
+
+            // 页面切换时的特殊操作
+            if (sectionName === 'collection') {
+                system.loadProductGroups();
+            } else if (sectionName === 'products') {
+                system.loadSavedProducts();
+            }
+        }
+
+        // 初始化系统
+        const system = new BatchProductSystem();
+    </script>
+</body>
+</html>
